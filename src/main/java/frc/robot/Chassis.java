@@ -6,7 +6,7 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.Timer;
+iport edu.wpi.first.wpilibj.Timer;
 
 public class Chassis extends BallDumpy implements RobotMap{
 
@@ -62,6 +62,18 @@ public class Chassis extends BallDumpy implements RobotMap{
         bLeft.setPositionConversionFactor(factor);
         bRight.setPositionConversionFactor(factor);
 
+    }
+
+    public static double[] getEncoderValues(){
+        return fLeft.getPosition();
+        //use flef
+        return fRight.YOINK
+
+    }
+
+    public static boolean[] getEncoderSigns(){
+        return fLeft.getPosition();
+        return fRight.YOINK
     }
 
    
@@ -174,3 +186,21 @@ public class Chassis extends BallDumpy implements RobotMap{
     
     
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////wassup tate
+
+

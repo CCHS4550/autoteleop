@@ -6,7 +6,29 @@
 /*----------------------------------------------------------------------------*/
 //testing
 package frc.robot;
+/*
 
+___
+|  \
+|   |
+|___/       84115
+|   \
+|    |
+|___/
+5318008
+7177135
+84115
+
+
+*/
+package com.mkyong.io.file;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.List;
 import edu.wpi.first.wpilibj.Compressor;
 // import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -65,12 +87,7 @@ public class Robot extends TimedRobot implements ControMap{
         alliance = -1;
       break;
     }
-    
-    
-
   }
-
-  
   /**
    * This function is called every robot packet, no matter the mode. Use
    * this for items like diagnostics that you want ran during disabled,
@@ -133,6 +150,18 @@ public class Robot extends TimedRobot implements ControMap{
   public void teleopInit() {
   }
 
+  public boolean recording = false;
+  public boolean pressed = false;
+  public static CCSparkMax fLeft = Chassis.fLeft;
+  public static CCSparkMax fRight = Chassis.fRight
+  public static CCSparkMax bLeft = Chassis.bLeft;
+  public static CCSparkMax bRight = Chassis.bRight;
+  public void eReset(){
+    fLeft.reset();
+    fRight.reset();
+    bLeft.reset();
+    bRight.reset();
+  }
   /**
    * This function is called periodically during operator control.
    */
@@ -141,9 +170,13 @@ public class Robot extends TimedRobot implements ControMap{
     // System.out.println("method teleopPeriodic() entry");
     Chassis.axisDrive(OI.axis(ControMap.L_JOYSTICK_VERTICAL),
                       OI.axis(ControMap.R_JOYSTICK_HORIZONTAL), 0.5);
+
+    if()
+            
 if(Arms.climberCont){
       if (OI.axis(LT) > 0){
         Arms.climberLeftDown();
+        
       }
       else if (OI.button(LB_BUTTON)){
         Arms.climberLeftUp();
@@ -154,7 +187,20 @@ if(Arms.climberCont){
         Arms.climberRightUp();
       } 
     }
+    if(OI.button(X_Button)){
+      if(!pressed){
+        pressed = true;
+        recording = !recording;
+        if(recording){
+          Chassis.reset();
+        }
+      }
+    } else {
+      pressed = false;
+    }
+
     
+
     if(OI.button(B_BUTTON)){
       Arms.toggleCont();
       Arms.climbMonkeyBars();
@@ -164,10 +210,6 @@ if(Arms.climberCont){
       BallDumpy.dumpy.set(true);
     else
       BallDumpy.dumpy.set(false);
-
-
-
-
 
    /* //shoot slow with A
     if(OI.button(ControMap.A_BUTTON)){
@@ -181,10 +223,6 @@ if(Arms.climberCont){
     }
     //climb with DPad
 */
-   
-
-    
-
   }
 
   /**
@@ -201,4 +239,11 @@ if(Arms.climberCont){
   public void testPeriodic() {
   }
 
+  }
+  
+
+  
+  }
 }
+
+
