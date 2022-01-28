@@ -1,5 +1,6 @@
 package frc.robot;
 
+import java.util.ArrayList;
 import frc.parent.*;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax.IdleMode;
@@ -59,21 +60,20 @@ public class Chassis extends BallDumpy implements RobotMap{
         //0.048 slow, 0.109 fast
         fLeft.setPositionConversionFactor(factor);
         fRight.setPositionConversionFactor(factor);
-        bLeft.setPositionConversionFactor(factor);
+        bLeft.setPositioknConversionFactor(factor);
         bRight.setPositionConversionFactor(factor);
 
     }
 
     public static double[] getEncoderValues(){
-        return fLeft.getPosition();
-        //use flef
-        return fRight.YOINK
+        double[] encoders = {fLeft.getPosition(), fRight.getPosition(), bLeft.getPosition(), bRight.getPosition()};
+        return encoders;
 
     }
 
     public static boolean[] getEncoderSigns(){
-        return fLeft.getPosition();
-        return fRight.YOINK
+        boolean[] encoderSigns = {fLeft.getEncoderSigns(), fRight.getEncoderSigns(), bLeft.getEncoderSigns(), bRight.getEncoderSigns()};
+        return encoderSigns;
     }
 
    

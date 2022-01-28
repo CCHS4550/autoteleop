@@ -80,6 +80,11 @@ public class CCSparkMax extends CANSparkMax{
         return encoder.getPosition();
     }
 
+    public boolean getEncoderSign(){
+        return encoder.getDirection();
+    }
+
+
     /**
      * Sets the PID values, must be positive
      * @param Kp The proportional gain value

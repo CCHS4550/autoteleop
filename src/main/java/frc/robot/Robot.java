@@ -29,6 +29,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.Date;
+import java.time.format.DateTimeFormatter;  
+import java.time.LocalDateTime;   
 import edu.wpi.first.wpilibj.Compressor;
 // import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -39,6 +42,8 @@ import frc.parent.ControMap;
 import frc.parent.RobotMap;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 
+import java.io.FileWriter;   // Import the FileWriter class
+import java.io.IOException;  // Import the IOException class to handle errors
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the TimedRobot
@@ -51,6 +56,9 @@ public class Robot extends TimedRobot implements ControMap{
   private static final String kCustomAuto = "My Auto";
   private static final String kResetPIDs = "Reset PIDs";
   private String m_autoSelected;
+
+  
+  
   //private final SendableChooser<String> m_chooser = new SendableChooser<>();
   private Compressor c = new Compressor(PneumaticsModuleType.REVPH);
 
@@ -146,8 +154,33 @@ public class Robot extends TimedRobot implements ControMap{
   public void autonomousPeriodic() {
   }
 
+
+   // private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
+  // private LocalDateTime now;  
+  Date date = new Date(); // This object contains the current date value
+  SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+  System.out.println(formatter.format(date));
+
+  private double [] previousEncoderSigns = {true, true, true, true}; 
+
+  LocalDateTime now = LocalDateTime.now();
+  String datetime = now.format(formatter);  
+  File myObj = new File(formatter.format(dat) + ".txt");
+
+  
   @Override
   public void teleopInit() {
+    
+    try {
+      if (myObj.createNewFile()) {
+        System.out.println("File created: " + myObj.getName());
+      } else {
+        System.out.println("File already exists.");
+      }
+    } catch (IOException e) {
+      System.out.println("File creation error.");
+      e.printStackTrace();
+    }
   }
 
   public boolean recording = false;
@@ -162,6 +195,13 @@ public class Robot extends TimedRobot implements ControMap{
     bLeft.reset();
     bRight.reset();
   }
+
+ 
+  
+
+
+  private FileWriter myWriter = new FileWriter("filename.txt");
+
   /**
    * This function is called periodically during operator control.
    */
@@ -171,7 +211,22 @@ public class Robot extends TimedRobot implements ControMap{
     Chassis.axisDrive(OI.axis(ControMap.L_JOYSTICK_VERTICAL),
                       OI.axis(ControMap.R_JOYSTICK_HORIZONTAL), 0.5);
 
-    if()
+    if(recording && previousEncoderSigns != Chassis.getEncoderSigns()){
+      //record to file
+      try {
+        double[] encoders = Chassis.getEncoderSigns();
+        myWriter.write(encoders[0] + "," + encoders[1] + "," + encoders[2] + "," + encoders[3][3]);
+        myWriter.newLine();
+        myWriter.close();
+        System.out.println("Successfully wrote to the file.");
+      } 
+      catch (IOException e) {
+        System.out.println("File write error.");
+        e.printStackTrace();
+      }
+    previousEncoderSigns = Chassis.getEncoderSigns();
+    }
+    // if()
             
 if(Arms.climberCont){
       if (OI.axis(LT) > 0){
@@ -193,6 +248,7 @@ if(Arms.climberCont){
         recording = !recording;
         if(recording){
           Chassis.reset();
+      
         }
       }
     } else {
@@ -223,6 +279,7 @@ if(Arms.climberCont){
     }
     //climb with DPad
 */
+previousEncoderSigns = Chassis.getEncoderSigns();
   }
 
   /**
@@ -246,4 +303,44 @@ if(Arms.climberCont){
   }
 }
 
+/*⠀⠀⠀⠀⠀⠀⠀
+              ⣠⣤⣤⣤⣤⣤⣶⣦⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⡿⠛⠉⠙⠛⠛⠛⠛⠻⢿⣿⣷⣤⡀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⠋⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⠈⢻⣿⣿⡄⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⣸⣿⡏⠀⠀⠀⣠⣶⣾⣿⣿⣿⠿⠿⠿⢿⣿⣿⣿⣄⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⣿⣿⠁⠀⠀⢰⣿⣿⣯⠁⠀⠀⠀⠀⠀⠀⠀⠈⠙⢿⣷⡄⠀
+⠀⠀⣀⣤⣴⣶⣶⣿⡟⠀⠀⠀⢸⣿⣿⣿⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣷⠀
+⠀⢰⣿⡟⠋⠉⣹⣿⡇⠀⠀⠀⠘⣿⣿⣿⣿⣷⣦⣤⣤⣤⣶⣶⣶⣶⣿⣿⣿⠀
+⠀⢸⣿⡇⠀⠀⣿⣿⡇⠀⠀⠀⠀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠃⠀
+⠀⣸⣿⡇⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠉⠻⠿⣿⣿⣿⣿⡿⠿⠿⠛⢻⣿⡇⠀⠀
+⠀⣿⣿⠁⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣧⠀⠀
+⠀⣿⣿⠀⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⠀⠀
+⠀⣿⣿⠀⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⠀⠀
+⠀⢿⣿⡆⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⡇⠀⠀
+⠀⠸⣿⣧⡀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⠃⠀⠀
+⠀⠀⠛⢿⣿⣿⣿⣿⣇⠀⠀⠀⠀⣰⣿⣿⣷⣶⣶⣶⣶⠶⠀⢠⣿⣿⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⣿⣿⠀⠀⠀⠀⠀⣿⣿⡇⠀⣽⣿⡏⠁⠀⠀⢸⣿⡇⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⣿⣿⠀⠀⠀⠀⠀⣿⣿⡇⠀⢹⣿⡆⠀⠀⠀⣸⣿⠇⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⢿⣿⣦⣄⣀⣠⣴⣿⣿⠁⠀⠈⠻⣿⣿⣿⣿⡿⠏⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠈⠛⠻⠿⠿⠿⠿⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 
+⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⡿⠛⠉⠙⠛⠛⠛⠛⠻⢿⣿⣷⣤⡀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⠋⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⠈⢻⣿⣿⡄⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⣸⣿⡏⠀⠀⠀⣠⣶⣾⣿⣿⣿⠿⠿⠿⢿⣿⣿⣿⣄⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⣿⣿⠁⠀⠀⢰⣿⣿⣯⠁⠀⠀⠀⠀⠀⠀⠀⠈⠙⢿⣷⡄⠀
+⠀⠀⣀⣤⣴⣶⣶⣿⡟⠀⠀⠀⢸⣿⣿⣿⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣷⠀
+⠀⢰⣿⡟⠋⠉⣹⣿⡇⠀⠀⠀⠘⣿⣿⣿⣿⣷⣦⣤⣤⣤⣶⣶⣶⣶⣿⣿⣿⠀
+⠀⢸⣿⡇⠀⠀⣿⣿⡇⠀⠀⠀⠀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠃⠀
+⠀⣸⣿⡇⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠉⠻⠿⣿⣿⣿⣿⡿⠿⠿⠛⢻⣿⡇⠀⠀
+⠀⣿⣿⠁⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣧⠀⠀
+⠀⣿⣿⠀⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⠀⠀
+⠀⣿⣿⠀⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⠀⠀
+⠀⢿⣿⡆⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⡇⠀⠀
+⠀⠸⣿⣧⡀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⠃⠀⠀
+⠀⠀⠛⢿⣿⣿⣿⣿⣇⠀⠀⠀⠀⠀⣰⣿⣿⣷⣶⣶⣶⣶⠶⢠⣿⣿⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⣿⣿⠀⠀⠀⠀⠀⣿⣿⡇⠀⣽⣿⡏⠁⠀⠀⢸⣿⡇⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⣿⣿⠀⠀⠀⠀⠀⣿⣿⡇⠀⢹⣿⡆⠀⠀⠀⣸⣿⠇⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⢿⣿⣦⣄⣀⣠⣴⣿⣿⠁⠀⠈⠻⣿⣿⣿⣿⡿⠏⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠈⠛⠻⠿⠿⠿⠿⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+
+*/
