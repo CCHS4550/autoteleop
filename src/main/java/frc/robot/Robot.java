@@ -91,6 +91,7 @@ public class Robot extends TimedRobot implements ControMap{
         alliance = 0; 
       break;
       
+      
       case Invalid:
         alliance = -1;
       break;
@@ -164,7 +165,7 @@ public class Robot extends TimedRobot implements ControMap{
   private double [] previousEncoderSigns = {true, true, true, true}; 
 
   LocalDateTime now = LocalDateTime.now();
-  String datetime = now.format(formatter);  
+  String datetime = now.format(formatter);
   File myObj = new File(formatter.format(dat) + ".txt");
 
   
@@ -186,7 +187,7 @@ public class Robot extends TimedRobot implements ControMap{
   public boolean recording = false;
   public boolean pressed = false;
   public static CCSparkMax fLeft = Chassis.fLeft;
-  public static CCSparkMax fRight = Chassis.fRight
+  public static CCSparkMax fRight = Chassis.fRight;
   public static CCSparkMax bLeft = Chassis.bLeft;
   public static CCSparkMax bRight = Chassis.bRight;
   public void eReset(){
@@ -202,6 +203,13 @@ public class Robot extends TimedRobot implements ControMap{
 
   private FileWriter myWriter = new FileWriter("filename.txt");
 
+  private List<List<Double>> data = new ArrayList<List<Double>>(); // Makes the main array
+  private int dataIndex = 0; // Stores the place where the array needs to be read
+  private boolean [] encodersReached = {false, false, false, false}; // Stores which specific encoders have reached the goal
+  
+  
+
+
   /**
    * This function is called periodically during operator control.
    */
@@ -212,10 +220,10 @@ public class Robot extends TimedRobot implements ControMap{
                       OI.axis(ControMap.R_JOYSTICK_HORIZONTAL), 0.5);
 
     if(recording && previousEncoderSigns != Chassis.getEncoderSigns()){
-      //record to file
+      // Writes to the recording file and manages file write errors.
       try {
-        double[] encoders = Chassis.getEncoderSigns();
-        myWriter.write(encoders[0] + "," + encoders[1] + "," + encoders[2] + "," + encoders[3][3]);
+        
+        myWriter.write(encoders[0] + "," + encoders[1] + "," + encoders[2] + "," + encoders[3]);
         myWriter.newLine();
         myWriter.close();
         System.out.println("Successfully wrote to the file.");
@@ -224,7 +232,7 @@ public class Robot extends TimedRobot implements ControMap{
         System.out.println("File write error.");
         e.printStackTrace();
       }
-    previousEncoderSigns = Chassis.getEncoderSigns();
+    previous    EncoderSigns = Chassis.getEncoderSigns();
     }
     // if()
             
@@ -242,7 +250,8 @@ if(Arms.climberCont){
         Arms.climberRightUp();
       } 
     }
-    if(OI.button(X_Button)){
+    // Enables and disables recording
+    if(OI.button(X_BUTTON)){
       if(!pressed){
         pressed = true;
         recording = !recording;
@@ -254,7 +263,55 @@ if(Arms.climberCont){
     } else {
       pressed = false;
     }
+    // Follows the instructions on the recording file
+    if(OI.button(Y_BUTTON)){
+      try {
+      File myObj = new File("filename.txt"); // Selects file
+      Scanner myReader = new Scanner(myObj); // Used to read the file
+      List<String> data2 = new ArrayList<String>(); // Makes a temporary array
+      double[] encoders = Chassis.getEncoderSigns(); // Stores encoder signs
+      while (myReader.hasNextLine()) {
+        // If the reader has not reached the end of the file:
+        String movement = myReader.nextLine(); // Stores the next file line as a string
+        data2 = Arrays.asList(movement.split(",")); // Reads the file line string and puts every value into an temporary array
+        data.add(data2); // Adds the temporary array into the main array
+      }
+      myReader.close();
+    } catch (FileNotFoundException e) {
+      System.out.println("An error finding the file occurred.");
+      e.printStackTrace();
+    } 
+      Chassis.reset();
+    }
 
+    // Stores encoder signs/values temporarily
+    double [] tempEncoderValues = Chassis.getEncoderValues();
+    boolean [] tempEncoderSigns = Chassis.getEncoderSigns();
+    int tempNumReachedGoal = 0;
+    if(dataIndex < data.size()){ // Checks if the end of the main array has been reached
+      for(int i = 0; i < 4; i++){
+        tempNumReachedGoal = 0; // Tracks # of encoders that have reached the goal out of 4
+        // tempEncoderValues[i] == 0
+        if(tempEncoderValues[i] >= data2.get(dataIndex).get(i) ){
+          // Encoder goal reached
+          Chassis.getMotorByIndex(i).set(0); // Stops specific motor
+          encodersReached[i] = true; // Tracks specific encoder that has reached goal.
+          tempNumReachedGoal++;
+        } 
+        else if(!encodersReached[i]){
+          // Encoder goal not reached, continue moving
+          Chassis.getMotorByIndex(i).set(0.5);
+        }
+        tempEncoderValues[i]
+        data2.get(dataIndex).get(i);
+        if(tempNumReachedGoal == 4){
+          // Moves to the next line of the main array when all 4 encoders have reached the goal
+          dataIndex++;
+        }
+      }
+     else{
+       System.out.println("WE DONDE DID ITISIJFD") // Translation: the file is full
+     }
     
 
     if(OI.button(B_BUTTON)){
@@ -279,7 +336,7 @@ if(Arms.climberCont){
     }
     //climb with DPad
 */
-previousEncoderSigns = Chassis.getEncoderSigns();
+previousEncoderSigns = Chassis.getEncoderSigns(); // Used to compare future encoder signs
   }
 
   /**
@@ -323,24 +380,4 @@ previousEncoderSigns = Chassis.getEncoderSigns();
 ⠀⠀⠀⠀⠀⠀⠀⣿⣿⠀⠀⠀⠀⠀⣿⣿⡇⠀⢹⣿⡆⠀⠀⠀⣸⣿⠇⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⢿⣿⣦⣄⣀⣠⣴⣿⣿⠁⠀⠈⠻⣿⣿⣿⣿⡿⠏⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠈⠛⠻⠿⠿⠿⠿⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-
-⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⡿⠛⠉⠙⠛⠛⠛⠛⠻⢿⣿⣷⣤⡀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⠋⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⠈⢻⣿⣿⡄⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⣸⣿⡏⠀⠀⠀⣠⣶⣾⣿⣿⣿⠿⠿⠿⢿⣿⣿⣿⣄⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⣿⣿⠁⠀⠀⢰⣿⣿⣯⠁⠀⠀⠀⠀⠀⠀⠀⠈⠙⢿⣷⡄⠀
-⠀⠀⣀⣤⣴⣶⣶⣿⡟⠀⠀⠀⢸⣿⣿⣿⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣷⠀
-⠀⢰⣿⡟⠋⠉⣹⣿⡇⠀⠀⠀⠘⣿⣿⣿⣿⣷⣦⣤⣤⣤⣶⣶⣶⣶⣿⣿⣿⠀
-⠀⢸⣿⡇⠀⠀⣿⣿⡇⠀⠀⠀⠀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠃⠀
-⠀⣸⣿⡇⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠉⠻⠿⣿⣿⣿⣿⡿⠿⠿⠛⢻⣿⡇⠀⠀
-⠀⣿⣿⠁⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣧⠀⠀
-⠀⣿⣿⠀⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⠀⠀
-⠀⣿⣿⠀⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⠀⠀
-⠀⢿⣿⡆⠀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⡇⠀⠀
-⠀⠸⣿⣧⡀⠀⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⠃⠀⠀
-⠀⠀⠛⢿⣿⣿⣿⣿⣇⠀⠀⠀⠀⠀⣰⣿⣿⣷⣶⣶⣶⣶⠶⢠⣿⣿⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⣿⣿⠀⠀⠀⠀⠀⣿⣿⡇⠀⣽⣿⡏⠁⠀⠀⢸⣿⡇⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⣿⣿⠀⠀⠀⠀⠀⣿⣿⡇⠀⢹⣿⡆⠀⠀⠀⣸⣿⠇⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⢿⣿⣦⣄⣀⣠⣴⣿⣿⠁⠀⠈⠻⣿⣿⣿⣿⡿⠏⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠈⠛⠻⠿⠿⠿⠿⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-
 */

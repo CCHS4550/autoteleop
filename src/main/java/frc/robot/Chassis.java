@@ -32,7 +32,24 @@ public class Chassis extends BallDumpy implements RobotMap{
     //AHRS gyro measures the angle of the bot
     public static AHRS gyro = new AHRS(SPI.Port.kMXP);
 
-    
+
+
+    public static CCSSparkmax getMotorByIndex(int motorID){
+        switch(motorID){
+            case 0:
+                return fLeft;
+                break;
+            case 1:
+                return fRight;
+                break;
+            case 2:
+                return bLeft;
+                break;
+            case 3:
+                return bRight;
+                break;
+        }
+    } 
 
     //To be used in TeleOP
     //Takes in two axises, most likely the controller axises
