@@ -114,6 +114,15 @@ public class Robot extends TimedRobot implements ControMap{
     else 
       c.disable();
   }
+  
+  //Declare and initialize variables for playback
+  private FileWriter myWriter = new FileWriter("filename.txt");
+
+  private List<List<Double>> data = new ArrayList<List<Double>>(); // Makes the main array
+  private int dataIndex = 0; // Stores the place where the array needs to be read
+  private boolean [] encodersReached = {false, false, false, false}; // Stores which specific encoders have reached the goal
+  
+
 //stage deez
   /**
    * This autonomous (along with the chooser code above) shows how to select
@@ -129,58 +138,147 @@ public class Robot extends TimedRobot implements ControMap{
   @Override
   public void autonomousInit() {
     Chassis.reset();
-    System.out.println("Auto selected: " + m_autoSelected);
+    // System.out.println("Auto selected: " + m_autoSelected);
     
-    double dist = SmartDashboard.getNumber("Distance", 0);
-    double angl = SmartDashboard.getNumber("Angle", 0);
-    switch (m_autoSelected) {
-      case kCustomAuto:
-        break;
-      case kDefaultAuto:
-        Chassis.driveDist(dist, 0.05, 0.04, 0.25, false);
-        Chassis.turnToAngle(angl, 0.005, 0.5, 0.25, false);
-        break;
-      case kResetPIDs:
-        break;
-      default:
-        break;
+    // double dist = SmartDashboard.getNumber("Distance", 0);
+    // double angl = SmartDashboard.getNumber("Angle", 0);
+    // switch (m_autoSelected) {
+    //   case kCustomAuto:
+    //     break;
+    //   case kDefaultAuto:
+    //     Chassis.driveDist(dist, 0.05, 0.04, 0.25, false);
+    //     Chassis.turnToAngle(angl, 0.005, 0.5, 0.25, false);
+    //     break;
+    //   case kResetPIDs:
+    //     break;
+    //   default:
+    //     break;
+    // }
+
+    //Get latest file
+    File dir = new File("test");
+    File[] directoryListing = dir.listFiles();
+    long latestFile = 0;
+    if (directoryListing != null) {
+        for (File f : directoryListing) {
+//                System.out.println(Long.parseLong(f.getName().substring(0, f.getName().length() - 4)));
+            long tempDate = Long.parseLong(f.getName().substring(0, f.getName().length() - 4));
+            if(tempDate > latestFile){
+                latestFile = tempDate;
+            }
+        }
+    } else {
+        // Handle the case where dir is not really a directory.
+        // Checking dir.isDirectory() above would not be sufficient
+        // to avoid race conditions with another process that deletes
+        // directories.
+        System.err.println("Path does not exist bruh");
     }
 
-  }
+    //Read file
+//     try {
+//       File f = new File(latestFile+".txt");
+//       BufferedReader br = new BufferedReader(new FileReader(f));
+//       String line = br.readLine();
+// //            System.out.println("The line is :" + line);
+//       while (line != null) {
+//           // process the line.
+// //                System.out.println("Line: "+line);
+//           line = br.readLine();
+//       }
+// //            System.out.println("asdfasdfasdf");
+//   } catch (IOException e) {
+//       e.printStackTrace();
+//   }
+
+  //Old code for autonomous
+  //Read file adn put into arraylist
+  try {        
+    File myObj = new File(latestFile+".txt"); // Selects file
+    Scanner myReader = new Scanner(myObj); // Used to read the file
+    List<String> data2 = new ArrayList<String>(); // Makes a temporary array
+    double[] encoders = Chassis.getEncoderSigns(); // Stores encoder signs
+    while (myReader.hasNextLine()) {
+      // If the reader has not reached the end of the file:
+      String movement = myReader.nextLine(); // Stores the next file line as a string
+      data2 = Arrays.asList(movement.split(",")); // Reads the file line string and puts every value into an temporary array
+      data.add(data2); // Adds the temporary array into the main array
+    }
+    myReader.close();
+} catch (FileNotFoundException e) {
+  System.out.println("An error finding the file occurred.");
+  e.printStackTrace();
+} 
+  Chassis.reset();
+
+
+
 
   /**
    * This function is called periodically during autonomous.
    */
   @Override
   public void autonomousPeriodic() {
+    // Stores encoder signs/values temporarily
+    double [] tempEncoderValues = Chassis.getEncoderValues();
+    boolean [] tempEncoderSigns = Chassis.getEncoderSigns();
+    int tempNumReachedGoal = 0;
+    if(dataIndex < data.size()){ // Checks if the end of the main array has been reached
+      for(int i = 0; i < 4; i++){
+        tempNumReachedGoal = 0; // Tracks # of encoders that have reached the goal out of 4
+        // tempEncoderValues[i] == 0
+        if(tempEncoderValues[i] >= data2.get(dataIndex).get(i) ){
+          // Encoder goal reached
+          Chassis.getMotorByIndex(i).set(0); // Stops specific motor
+          encodersReached[i] = true; // Tracks specific encoder that has reached goal.
+          tempNumReachedGoal++;
+        } 
+        else if(!encodersReached[i]){
+          // Encoder goal not reached, continue moving
+          Chassis.getMotorByIndex(i).set(0.5);
+        }
+        tempEncoderValues[i]
+        data2.get(dataIndex).get(i);
+        if(tempNumReachedGoal == 4){
+          // Moves to the next line of the main array when all 4 encoders have reached the goal
+          dataIndex++;
+        }
+      }
+    else{
+      System.out.println("WE DONDE DID ITISIJFD") // Translation: the file is full
+    }
+
+  }
   }
 
 
    // private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
   // private LocalDateTime now;  
-  Date date = new Date(); // This object contains the current date value
-  SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-  System.out.println(formatter.format(date));
+  // Date date = new Date(); // This object contains the current date value
+  // SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+  // System.out.println(formatter.format(date));
 
   private double [] previousEncoderSigns = {true, true, true, true}; 
 
-  LocalDateTime now = LocalDateTime.now();
-  String datetime = now.format(formatter);
-  File myObj = new File(formatter.format(dat) + ".txt");
+  // LocalDateTime now = LocalDateTime.now();
+  // String datetime = now.format(formatter);
+  // File myObj = new File(formatter.format(dat) + ".txt");
 
   
   @Override
   public void teleopInit() {
     
-    try {
-      if (myObj.createNewFile()) {
-        System.out.println("File created: " + myObj.getName());
-      } else {
-        System.out.println("File already exists.");
-      }
+      //Write
+      try {
+        //Create current file
+        Files.createDirectories(Paths.get("test"));
+        Date date = new Date();
+        long timeMilli = date.getTime();
+        File textObject = new File("test",timeMilli + ".txt");
+        textObject.createNewFile();
+
     } catch (IOException e) {
-      System.out.println("File creation error.");
-      e.printStackTrace();
+        e.printStackTrace();
     }
   }
 
@@ -201,12 +299,6 @@ public class Robot extends TimedRobot implements ControMap{
   
 
 
-  private FileWriter myWriter = new FileWriter("filename.txt");
-
-  private List<List<Double>> data = new ArrayList<List<Double>>(); // Makes the main array
-  private int dataIndex = 0; // Stores the place where the array needs to be read
-  private boolean [] encodersReached = {false, false, false, false}; // Stores which specific encoders have reached the goal
-  
   
 
 
@@ -222,7 +314,8 @@ public class Robot extends TimedRobot implements ControMap{
     if(recording && previousEncoderSigns != Chassis.getEncoderSigns()){
       // Writes to the recording file and manages file write errors.
       try {
-        
+        //Write Line
+        FileWriter myWriter = new FileWriter("test/"+timeMilli+".txt");        
         myWriter.write(encoders[0] + "," + encoders[1] + "," + encoders[2] + "," + encoders[3]);
         myWriter.newLine();
         myWriter.close();
@@ -265,53 +358,8 @@ if(Arms.climberCont){
     }
     // Follows the instructions on the recording file
     if(OI.button(Y_BUTTON)){
-      try {
-      File myObj = new File("filename.txt"); // Selects file
-      Scanner myReader = new Scanner(myObj); // Used to read the file
-      List<String> data2 = new ArrayList<String>(); // Makes a temporary array
-      double[] encoders = Chassis.getEncoderSigns(); // Stores encoder signs
-      while (myReader.hasNextLine()) {
-        // If the reader has not reached the end of the file:
-        String movement = myReader.nextLine(); // Stores the next file line as a string
-        data2 = Arrays.asList(movement.split(",")); // Reads the file line string and puts every value into an temporary array
-        data.add(data2); // Adds the temporary array into the main array
-      }
-      myReader.close();
-    } catch (FileNotFoundException e) {
-      System.out.println("An error finding the file occurred.");
-      e.printStackTrace();
-    } 
-      Chassis.reset();
+     
     }
-
-    // Stores encoder signs/values temporarily
-    double [] tempEncoderValues = Chassis.getEncoderValues();
-    boolean [] tempEncoderSigns = Chassis.getEncoderSigns();
-    int tempNumReachedGoal = 0;
-    if(dataIndex < data.size()){ // Checks if the end of the main array has been reached
-      for(int i = 0; i < 4; i++){
-        tempNumReachedGoal = 0; // Tracks # of encoders that have reached the goal out of 4
-        // tempEncoderValues[i] == 0
-        if(tempEncoderValues[i] >= data2.get(dataIndex).get(i) ){
-          // Encoder goal reached
-          Chassis.getMotorByIndex(i).set(0); // Stops specific motor
-          encodersReached[i] = true; // Tracks specific encoder that has reached goal.
-          tempNumReachedGoal++;
-        } 
-        else if(!encodersReached[i]){
-          // Encoder goal not reached, continue moving
-          Chassis.getMotorByIndex(i).set(0.5);
-        }
-        tempEncoderValues[i]
-        data2.get(dataIndex).get(i);
-        if(tempNumReachedGoal == 4){
-          // Moves to the next line of the main array when all 4 encoders have reached the goal
-          dataIndex++;
-        }
-      }
-     else{
-       System.out.println("WE DONDE DID ITISIJFD") // Translation: the file is full
-     }
     
 
     if(OI.button(B_BUTTON)){
