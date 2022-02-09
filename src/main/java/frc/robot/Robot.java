@@ -193,26 +193,26 @@ public class Robot extends TimedRobot implements ControMap{
 
   //Old code for autonomous
   //Read file adn put into arraylist
-  try {        
-    File myObj = new File(latestFile+".txt"); // Selects file
-    Scanner myReader = new Scanner(myObj); // Used to read the file
-    List<String> data2 = new ArrayList<String>(); // Makes a temporary array
-    double[] encoders = Chassis.getEncoderSigns(); // Stores encoder signs
-    while (myReader.hasNextLine()) {
-      // If the reader has not reached the end of the file:
-      String movement = myReader.nextLine(); // Stores the next file line as a string
-      data2 = Arrays.asList(movement.split(",")); // Reads the file line string and puts every value into an temporary array
-      data.add(data2); // Adds the temporary array into the main array
-    }
-    myReader.close();
-} catch (FileNotFoundException e) {
-  System.out.println("An error finding the file occurred.");
-  e.printStackTrace();
-} 
-  Chassis.reset();
+    try {        
+      File myObj = new File(latestFile+".txt"); // Selects file
+      Scanner myReader = new Scanner(myObj); // Used to read the file
+      List<String> data2 = new ArrayList<String>(); // Makes a temporary array
+      double[] encoders = Chassis.getEncoderSigns(); // Stores encoder signs
+      while (myReader.hasNextLine()) {
+        // If the reader has not reached the end of the file:
+        String movement = myReader.nextLine(); // Stores the next file line as a string
+        data2 = Arrays.asList(movement.split(",")); // Reads the file line string and puts every value into an temporary array
+        data.add(data2); // Adds the temporary array into the main array
+      }
+       myReader.close();
+    } catch (FileNotFoundException e) {
+      System.out.println("An error finding the file occurred.");
+      e.printStackTrace();
+    } 
+    Chassis.reset();
 
 
-
+  }
 
   /**
    * This function is called periodically during autonomous.
@@ -325,7 +325,7 @@ public class Robot extends TimedRobot implements ControMap{
         System.out.println("File write error.");
         e.printStackTrace();
       }
-    previous    EncoderSigns = Chassis.getEncoderSigns();
+    previousEncoderSigns = Chassis.getEncoderSigns();
     }
     // if()
             
