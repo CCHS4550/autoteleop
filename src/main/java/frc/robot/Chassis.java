@@ -1,15 +1,15 @@
 package frc.robot;
 
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import frc.parent.*;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.SPI;
-iport edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.Timer;
 
-public class Chassis extends BallDumpy implements RobotMap{
+public class Chassis extends BallDumpy{
 
     //Talon objects for the wheels
     //These control the main 4 motors on the robot
@@ -34,21 +34,26 @@ public class Chassis extends BallDumpy implements RobotMap{
 
 
 
-    public static CCSSparkmax getMotorByIndex(int motorID){
+    public static CCSparkMax getMotorByIndex(int motorID){
+        CCSparkMax mot = null;
         switch(motorID){
             case 0:
-                return fLeft;
+                mot = fLeft;
                 break;
             case 1:
-                return fRight;
+                mot = fRight;
                 break;
             case 2:
-                return bLeft;
+                mot = bLeft;
                 break;
             case 3:
-                return bRight;
+                mot = bRight;
+                break;
+            default:
+                mot = null;
                 break;
         }
+        return mot;
     } 
 
     //To be used in TeleOP
@@ -77,7 +82,7 @@ public class Chassis extends BallDumpy implements RobotMap{
         //0.048 slow, 0.109 fast
         fLeft.setPositionConversionFactor(factor);
         fRight.setPositionConversionFactor(factor);
-        bLeft.setPositioknConversionFactor(factor);
+        bLeft.setPositionConversionFactor(factor);
         bRight.setPositionConversionFactor(factor);
 
     }
@@ -89,7 +94,7 @@ public class Chassis extends BallDumpy implements RobotMap{
     }
 
     public static boolean[] getEncoderSigns(){
-        boolean[] encoderSigns = {fLeft.getEncoderSigns(), fRight.getEncoderSigns(), bLeft.getEncoderSigns(), bRight.getEncoderSigns()};
+        boolean[] encoderSigns = {fLeft.getEncoderSign(), fRight.getEncoderSign(), bLeft.getEncoderSign(), bRight.getEncoderSign()};
         return encoderSigns;
     }
 

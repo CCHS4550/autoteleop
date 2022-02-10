@@ -81,7 +81,7 @@ public class CCSparkMax extends CANSparkMax{
     }
 
     public boolean getEncoderSign(){
-        return encoder.getDirection();
+        return encoder.getInverted();
     }
 
 

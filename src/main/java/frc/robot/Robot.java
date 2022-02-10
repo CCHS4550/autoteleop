@@ -21,7 +21,7 @@ ___
 
 
 */
-package com.mkyong.io.file;
+import java.util.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Date;
 import java.time.format.DateTimeFormatter;  
 import java.time.LocalDateTime;   
-import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.Compressor;  
 // import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -116,12 +116,12 @@ public class Robot extends TimedRobot implements ControMap{
   }
   
   //Declare and initialize variables for playback
-  private FileWriter myWriter = new FileWriter("filename.txt");
+  //private FileWriter myWriter = new FileWriter("filename.txt");
 
-  private List<List<Double>> data = new ArrayList<List<Double>>(); // Makes the main array
+  private List<List<String>> data = new ArrayList<List<String>>(); // Makes the main array
   private int dataIndex = 0; // Stores the place where the array needs to be read
   private boolean [] encodersReached = {false, false, false, false}; // Stores which specific encoders have reached the goal
-  
+  public boolean[] encoders;
 
 //stage deez
   /**
@@ -197,7 +197,7 @@ public class Robot extends TimedRobot implements ControMap{
       File myObj = new File(latestFile+".txt"); // Selects file
       Scanner myReader = new Scanner(myObj); // Used to read the file
       List<String> data2 = new ArrayList<String>(); // Makes a temporary array
-      double[] encoders = Chassis.getEncoderSigns(); // Stores encoder signs
+      encoders = Chassis.getEncoderSigns(); // Stores encoder signs
       while (myReader.hasNextLine()) {
         // If the reader has not reached the end of the file:
         String movement = myReader.nextLine(); // Stores the next file line as a string
@@ -227,7 +227,7 @@ public class Robot extends TimedRobot implements ControMap{
       for(int i = 0; i < 4; i++){
         tempNumReachedGoal = 0; // Tracks # of encoders that have reached the goal out of 4
         // tempEncoderValues[i] == 0
-        if(tempEncoderValues[i] >= data2.get(dataIndex).get(i) ){
+        if(tempEncoderValues[i] >= Double.parseDouble(data.get(dataIndex).get(i))){
           // Encoder goal reached
           Chassis.getMotorByIndex(i).set(0); // Stops specific motor
           encodersReached[i] = true; // Tracks specific encoder that has reached goal.
@@ -237,18 +237,17 @@ public class Robot extends TimedRobot implements ControMap{
           // Encoder goal not reached, continue moving
           Chassis.getMotorByIndex(i).set(0.5);
         }
-        tempEncoderValues[i]
-        data2.get(dataIndex).get(i);
+        //tempEncoderValues[i];
+        data.get(dataIndex).get(i);
         if(tempNumReachedGoal == 4){
           // Moves to the next line of the main array when all 4 encoders have reached the goal
           dataIndex++;
         }
       }
-    else{
-      System.out.println("WE DONDE DID ITISIJFD") // Translation: the file is full
+    } else{
+      System.out.println("WE DONDE DID ITISIJFD"); // Translation: the file is full
     }
 
-  }
   }
 
 
@@ -258,12 +257,12 @@ public class Robot extends TimedRobot implements ControMap{
   // SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
   // System.out.println(formatter.format(date));
 
-  private double [] previousEncoderSigns = {true, true, true, true}; 
+  private boolean [] previousEncoderSigns = {true, true, true, true}; 
 
   // LocalDateTime now = LocalDateTime.now();
   // String datetime = now.format(formatter);
   // File myObj = new File(formatter.format(dat) + ".txt");
-
+  public long timeMilli = 0;
   
   @Override
   public void teleopInit() {
@@ -273,7 +272,7 @@ public class Robot extends TimedRobot implements ControMap{
         //Create current file
         Files.createDirectories(Paths.get("test"));
         Date date = new Date();
-        long timeMilli = date.getTime();
+        timeMilli = date.getTime();
         File textObject = new File("test",timeMilli + ".txt");
         textObject.createNewFile();
 
@@ -317,7 +316,7 @@ public class Robot extends TimedRobot implements ControMap{
         //Write Line
         FileWriter myWriter = new FileWriter("test/"+timeMilli+".txt");        
         myWriter.write(encoders[0] + "," + encoders[1] + "," + encoders[2] + "," + encoders[3]);
-        myWriter.newLine();
+        myWriter.write("\n");
         myWriter.close();
         System.out.println("Successfully wrote to the file.");
       } 
@@ -384,6 +383,7 @@ if(Arms.climberCont){
     }
     //climb with DPad
 */
+  
 previousEncoderSigns = Chassis.getEncoderSigns(); // Used to compare future encoder signs
   }
 
@@ -405,8 +405,7 @@ previousEncoderSigns = Chassis.getEncoderSigns(); // Used to compare future enco
   
 
   
-  }
-}
+  
 
 /*⠀⠀⠀⠀⠀⠀⠀
               ⣠⣤⣤⣤⣤⣤⣶⣦⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀
