@@ -60,7 +60,7 @@ public class Robot extends TimedRobot implements ControMap{
   
   
   //private final SendableChooser<String> m_chooser = new SendableChooser<>();
-  private Compressor c = new Compressor(PneumaticsModuleType.REVPH);
+  private Compressor c = new Compressor(PneumaticsModuleType.CTREPCM);
 
 
   int alliance;
@@ -156,7 +156,7 @@ public class Robot extends TimedRobot implements ControMap{
     // }
 
     //Get latest file
-    File dir = new File("test");
+    File dir = new File("/home/lvuser/test");
     File[] directoryListing = dir.listFiles();
     long latestFile = 0;
     if (directoryListing != null) {
@@ -194,7 +194,7 @@ public class Robot extends TimedRobot implements ControMap{
   //Old code for autonomous
   //Read file adn put into arraylist
     try {        
-      File myObj = new File(latestFile+".txt"); // Selects file
+      File myObj = new File("/home/lvuser/test",latestFile+".txt"); // Selects file
       Scanner myReader = new Scanner(myObj); // Used to read the file
       List<String> data2 = new ArrayList<String>(); // Makes a temporary array
       encoders = Chassis.getEncoderSigns(); // Stores encoder signs
@@ -270,10 +270,10 @@ public class Robot extends TimedRobot implements ControMap{
       //Write
       try {
         //Create current file
-        Files.createDirectories(Paths.get("test"));
+        Files.createDirectories(Paths.get("/home/lvuser/test"));
         Date date = new Date();
         timeMilli = date.getTime();
-        File textObject = new File("test",timeMilli + ".txt");
+        File textObject = new File("/home/lvuser/test",timeMilli + ".txt");
         textObject.createNewFile();
 
     } catch (IOException e) {
@@ -307,14 +307,14 @@ public class Robot extends TimedRobot implements ControMap{
   @Override
   public void teleopPeriodic() {
     // System.out.println("method teleopPeriodic() entry");
-    Chassis.axisDrive(OI.axis(ControMap.L_JOYSTICK_VERTICAL),
-                      OI.axis(ControMap.R_JOYSTICK_HORIZONTAL), 0.5);
+    Chassis.axisDrive(OI.axis(0, ControMap.L_JOYSTICK_VERTICAL),
+                      OI.axis(0, ControMap.R_JOYSTICK_HORIZONTAL), 0.5);
 
     if(recording && previousEncoderSigns != Chassis.getEncoderSigns()){
       // Writes to the recording file and manages file write errors.
       try {
         //Write Line
-        FileWriter myWriter = new FileWriter("test/"+timeMilli+".txt");        
+        FileWriter myWriter = new FileWriter("/home/lvuser/test/"+timeMilli+".txt");        
         myWriter.write(encoders[0] + "," + encoders[1] + "," + encoders[2] + "," + encoders[3]);
         myWriter.write("\n");
         myWriter.close();
@@ -329,55 +329,60 @@ public class Robot extends TimedRobot implements ControMap{
     // if()
             
 if(Arms.climberCont){
-      if (OI.axis(LT) > 0){
+      if (OI.axis(0, LT) > 0){
         Arms.climberLeftDown();
         
       }
-      else if (OI.button(LB_BUTTON)){
+      else if (OI.button(0, LB_BUTTON)){
         Arms.climberLeftUp();
       }
-      if(OI.axis(RT) > 0){
+      if(OI.axis(0, RT) > 0){
         Arms.climberRightDown();
-      } else if(OI.button(RB_BUTTON)){
+      } else if(OI.button(0, RB_BUTTON)){
         Arms.climberRightUp();
       } 
     }
     // Enables and disables recording
-    if(OI.button(X_BUTTON)){
+    if(OI.button(0,X_BUTTON)){
+      System.out.println("X_BUTTON");
       if(!pressed){
         pressed = true;
         recording = !recording;
         if(recording){
           Chassis.reset();
-      
+          System.out.println("AUJIBHSUYJBDBHJASD");
         }
       }
     } else {
       pressed = false;
     }
+
+    if(recording){
+      System.out.println("recording my bruh");
+    }
     // Follows the instructions on the recording file
-    if(OI.button(Y_BUTTON)){
+    if(OI.button(0, Y_BUTTON)){
      
     }
     
 
-    if(OI.button(B_BUTTON)){
+    if(OI.button(0, B_BUTTON)){
       Arms.toggleCont();
       Arms.climbMonkeyBars();
     }
 
-    if(OI.button(A_BUTTON))
+    if(OI.button(0, A_BUTTON))
       BallDumpy.dumpy.set(true);
     else
       BallDumpy.dumpy.set(false);
 
    /* //shoot slow with A
-    if(OI.button(ControMap.A_BUTTON)){
+    if(OI.button(0, ControMap.A_BUTTON)){
       Chassis.setFastMode(true);
       Chassis.setFactor(0.048);
     }
     //shoot fast with B
-    if (OI.button(ControMap.B_BUTTON)){  
+    if (OI.button(0, ControMap.B_BUTTON)){  
       Chassis.setFastMode(false);
       Chassis.setFactor(0.109);
     }
